@@ -9,12 +9,31 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const LoginScreen = () => {
+const LoginScreen = ({navigation}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [token, setToken] = useState(null);
+
+  console.log('🚀 ~ HomeScreen ~ token:', token);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const tkn = await AsyncStorage.getItem('token');
+      setToken(tkn);
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      navigation.navigate('Home');
+    }
+  }, [token, navigation]);
 
   const handleSubmit = async () => {
     const url = `${process.env.API_URL}/login`;
@@ -39,6 +58,11 @@ const LoginScreen = () => {
           // text2: 'This is some something 👋',
         });
       }
+
+      await AsyncStorage.setItem('token', json.token);
+      await AsyncStorage.setItem('user', JSON.stringify(json.user));
+
+      navigation.navigate('Home');
     } catch (error) {
       console.error('error.message', error.message);
     }

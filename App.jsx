@@ -97,6 +97,7 @@ function App() {
     <>
       <NavigationContainer>
         <Stack.Navigator>
+          <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen
             name="Login"
             component={LoginScreen}
@@ -107,7 +108,6 @@ function App() {
             component={RegisterScreen}
             options={{headerShown: false}}
           />
-          <Stack.Screen name="Home" component={HomeScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast position="top" visibilityTime={10000} />
