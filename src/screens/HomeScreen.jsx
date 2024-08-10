@@ -1,37 +1,14 @@
 import {Button, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
+import {UserContext} from '../../App';
 
 const HomeScreen = () => {
-  const [token, setToken] = useState(null);
-  const navigation = useNavigation();
+  const {authUser, setAuthUser} = useContext(UserContext);
 
-  console.log('🚀 ~ HomeScreen ~ token:', token);
+  console.log('🚀 ~ HomeScreen ~ token:', authUser.token);
+  console.log('🚀 ~ HomeScreen ~ user:', typeof authUser.user);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const tkn = await AsyncStorage.getItem('token');
-      setToken(tkn);
-    };
-
-    // const tokenCheck = () => {
-    //   if (!token) {
-    //     navigation.replace('Login');
-    //   }
-    // };
-
-    fetchUser();
-    // tokenCheck();
-  }, []);
-
-  // const tokenCheck = () => {
-  //   if (!token) {
-  //     navigation.replace('Login');
-  //   }
-  // };
-
-  // tokenCheck();
   const logout = () => {
     clearAuthToken();
   };
@@ -39,22 +16,23 @@ const HomeScreen = () => {
     const url = `${process.env.API_URL}/logout`;
     console.log('🚀 ~ clearAuthToken ~ url:', url);
     try {
-      await AsyncStorage.removeItem('token');
-      setToken('');
       const response = await fetch(url, {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authUser.token}`,
         },
         method: 'GET',
       });
 
       const json = await response.json();
       console.log('🚀 ~ clearAuthToken ~ json:', json);
-      if (json.success) {
-        navigation.replace('Login');
-      }
+
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('user');
+      setAuthUser(prev => {
+        return {...prev, token: null, user: {}};
+      });
     } catch (error) {
       console.log('Error', error);
     }
@@ -62,8 +40,9 @@ const HomeScreen = () => {
 
   return (
     <View>
-      <Text>rrrrrrrrrrrrrrr {token}</Text>
-      <Button onPress={logout} title="Logout"></Button>
+      <Text>Token: {authUser.token}</Text>
+      <Text>Name: {authUser.user.name}</Text>
+      <Button onPress={logout} title="Logout" />
     </View>
   );
 };

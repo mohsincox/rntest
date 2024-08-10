@@ -1,7 +1,4 @@
-/* */
 import {
-  Alert,
-  Button,
   Pressable,
   SafeAreaView,
   StyleSheet,
@@ -9,31 +6,21 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {UserContext} from '../../App';
 
 const LoginScreen = ({navigation}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState(null);
-
-  console.log('🚀 ~ HomeScreen ~ token:', token);
+  const {setAuthUser, authUser} = useContext(UserContext);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const tkn = await AsyncStorage.getItem('token');
-      setToken(tkn);
-    };
-
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (token) {
+    if (authUser.token) {
       navigation.navigate('Home');
     }
-  }, [token, navigation]);
+  }, [authUser.token, navigation]);
 
   const handleSubmit = async () => {
     const url = `${process.env.API_URL}/login`;
@@ -61,6 +48,10 @@ const LoginScreen = ({navigation}) => {
 
       await AsyncStorage.setItem('token', json.token);
       await AsyncStorage.setItem('user', JSON.stringify(json.user));
+
+      setAuthUser(() => {
+        return {user: json.user, token: json.token};
+      });
 
       navigation.navigate('Home');
     } catch (error) {
