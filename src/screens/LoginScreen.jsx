@@ -44,16 +44,16 @@ const LoginScreen = ({navigation}) => {
           text1: json.message,
           // text2: 'This is some something 👋',
         });
+      } else {
+        await AsyncStorage.setItem('token', json.token);
+        await AsyncStorage.setItem('user', JSON.stringify(json.user));
+
+        setAuthUser(() => {
+          return {user: json.user, token: json.token};
+        });
+
+        navigation.navigate('Home');
       }
-
-      await AsyncStorage.setItem('token', json.token);
-      await AsyncStorage.setItem('user', JSON.stringify(json.user));
-
-      setAuthUser(() => {
-        return {user: json.user, token: json.token};
-      });
-
-      navigation.navigate('Home');
     } catch (error) {
       console.error('error.message', error.message);
     }
