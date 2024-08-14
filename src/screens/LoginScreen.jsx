@@ -6,56 +6,51 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import Toast from 'react-native-toast-message';
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from '../redux/user/userSlice';
+import {useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {UserContext} from '../../App';
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const {setAuthUser, authUser} = useContext(UserContext);
 
-  useEffect(() => {
-    if (authUser.token) {
-      navigation.navigate('Home');
-    }
-  }, [authUser.token, navigation]);
+  const dispatch = useDispatch();
 
   const handleSubmit = async () => {
-    const url = `${process.env.API_URL}/login`;
-    console.log('🚀 ~ handleSubmit ~ url:', url);
-
     try {
-      const response = await fetch(url, {
+      dispatch(signInStart());
+      const res = await fetch(`${process.env.API_URL}/login`, {
+        method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
-        method: 'POST',
         body: JSON.stringify({email: username, password}),
       });
-
-      const json = await response.json();
-
-      if (response.status === 422) {
-        Toast.show({
-          type: 'error',
-          text1: json.message,
-          // text2: 'This is some something 👋',
-        });
-      } else {
-        await AsyncStorage.setItem('token', json.token);
-        await AsyncStorage.setItem('user', JSON.stringify(json.user));
-
-        setAuthUser(() => {
-          return {user: json.user, token: json.token};
-        });
-
-        navigation.navigate('Home');
+      const data = await res.json();
+      console.log('data--------', data);
+      if (data.success === false) {
+        dispatch(signInFailure(data.message));
+        Toast.show({type: 'error', text1: data.message});
+        return;
       }
+
+      if (res.status === 422) {
+        dispatch(signInFailure(data.message));
+        Toast.show({type: 'error', text1: data.message + '422'});
+        return;
+      }
+      dispatch(signInSuccess(data));
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
     } catch (error) {
-      console.error('error.message', error.message);
+      dispatch(signInFailure(error.message));
     }
   };
   return (
