@@ -6,16 +6,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Toast from 'react-native-toast-message';
-import {
-  signInFailure,
-  signInStart,
-  signInSuccess,
-} from '../redux/user/userSlice';
+import {login} from '../redux/user/userSlice';
 import {useDispatch} from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axiosInstance from '../services/api';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -23,24 +17,23 @@ const LoginScreen = () => {
 
   const dispatch = useDispatch();
 
-  const handleSubmit = async () => {
-    try {
-      dispatch(signInStart());
+  // const {loading, user, token, error, success} = useSelector(
+  //   state => state.authUser,
+  // );
 
-      const {data} = await axiosInstance.post(
-        '/login',
-        JSON.stringify({email: username, password}),
-      );
-      console.log('data----', data);
-      dispatch(signInSuccess(data));
-      await AsyncStorage.setItem('token', data.token);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
-      Toast.show({type: 'success', text1: data.message});
-    } catch (error) {
-      console.log('🚀 ~ handleSubmit ~ error:-------', error);
-      dispatch(signInFailure(error?.response?.data?.message));
-      Toast.show({type: 'error', text1: error?.response?.data?.message});
-    }
+  // useEffect(() => {
+  //   if (error) {
+  //     Toast.show({type: 'error', text1: error});
+  //   }
+  // });
+
+  const handleSubmit = async () => {
+    const userData = {
+      email: username,
+      password,
+    };
+
+    dispatch(login(userData));
   };
   return (
     <SafeAreaView style={styles.container}>

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {useSelector} from 'react-redux';
 import {store} from '../redux/store';
 import {selectToken} from '../redux/user/userSlice';
 

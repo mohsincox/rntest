@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -14,7 +14,7 @@ const StackNavigator = () => {
   console.log('🚀 ~ StackNavigator ~ token:', token);
   return (
     <NavigationContainer>
-      {token === null || token === '' ? (
+      {token === null || token === '' || token === undefined ? (
         <Stack.Navigator>
           <Stack.Screen
             name="Login"
