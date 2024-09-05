@@ -9,24 +9,19 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
+import axiosInstance from '../services/api';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
-  const token = useSelector(state => state.user.token);
+  const token = useSelector(state => state.authUser.token);
   console.log('🚀 ~ HomeScreen ~ token:', token);
-  const user = useSelector(state => state.user.user);
+  const user = useSelector(state => state.authUser.user);
   console.log('🚀 ~ HomeScreen ~ user:', typeof user);
 
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const {data} = await axios.get(`${process.env.API_URL}/logout`, {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const {data} = await axiosInstance.get('/logout');
       if (data.success === true) {
         dispatch(signOutUserSuccess(data));
         Toast.show({type: 'success', text1: data.message});

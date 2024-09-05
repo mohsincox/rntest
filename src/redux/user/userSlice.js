@@ -53,4 +53,5 @@ export const {
   signOutUserFailure,
 } = userSlice.actions;
 
+export const selectToken = state => state.authUser.token;
 export default userSlice.reducer;

@@ -10,7 +10,7 @@ import {useSelector} from 'react-redux';
 const Stack = createNativeStackNavigator();
 
 const StackNavigator = () => {
-  const token = useSelector(state => state.user.token);
+  const token = useSelector(state => state.authUser.token);
   console.log('🚀 ~ StackNavigator ~ token:', token);
   return (
     <NavigationContainer>

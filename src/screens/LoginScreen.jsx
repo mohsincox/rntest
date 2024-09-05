@@ -15,7 +15,7 @@ import {
 } from '../redux/user/userSlice';
 import {useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import axiosInstance from '../services/api';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -27,15 +27,9 @@ const LoginScreen = () => {
     try {
       dispatch(signInStart());
 
-      const {data} = await axios.post(
-        `${process.env.API_URL}/login`,
+      const {data} = await axiosInstance.post(
+        '/login',
         JSON.stringify({email: username, password}),
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        },
       );
       console.log('data----', data);
       dispatch(signInSuccess(data));
@@ -43,8 +37,9 @@ const LoginScreen = () => {
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       Toast.show({type: 'success', text1: data.message});
     } catch (error) {
-      dispatch(signInFailure(error.response.data.message));
-      Toast.show({type: 'error', text1: error.response.data.message});
+      console.log('🚀 ~ handleSubmit ~ error:-------', error);
+      dispatch(signInFailure(error?.response?.data?.message));
+      Toast.show({type: 'error', text1: error?.response?.data?.message});
     }
   };
   return (
