@@ -8,6 +8,7 @@ import {
 } from '../redux/user/userSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import axios from 'axios';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
@@ -19,27 +20,13 @@ const HomeScreen = () => {
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const res = await fetch(`${process.env.API_URL}/logout`, {
+      const {data} = await axios.get(`${process.env.API_URL}/logout`, {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        method: 'GET',
       });
-      const data = await res.json();
-      console.log('🚀 ~ handleSignOut ~ data:', data);
-      if (data.success === false) {
-        dispatch(signOutUserFailure(data.message));
-        Toast.show({type: 'error', text1: data.message});
-        return;
-      }
-      if (res.status === 401) {
-        dispatch(signOutUserFailure(data.message));
-        Toast.show({type: 'error', text1: data.message});
-
-        return;
-      }
       if (data.success === true) {
         dispatch(signOutUserSuccess(data));
         Toast.show({type: 'success', text1: data.message});
@@ -48,7 +35,8 @@ const HomeScreen = () => {
       }
     } catch (error) {
       console.log('🚀 ~ handleSignOut ~ error:', error);
-      dispatch(signOutUserFailure(error.message));
+      dispatch(signOutUserFailure(error.response.data.message));
+      Toast.show({type: 'error', text1: error.response.data.message});
     }
   };
   return (
